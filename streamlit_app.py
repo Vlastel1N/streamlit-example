@@ -2,10 +2,7 @@ import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
-import plotly.express as px
-import matplotlib.pyplot as plt
 import plotly.graph_objs as go
-from datetime import datetime
 
 # Создать большую надпись
 st.title("Прогнозирование потребления электроэнергии в Свердловской области")
