@@ -2,39 +2,46 @@ import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
+import plotly.express as px
+import matplotlib.pyplot as plt
+import plotly.graph_objs as go
+from datetime import datetime
 
-"""
-# Welcome to Streamlit!
+# Создать большую надпись
+st.title("Прогнозирование потребления электроэнергии в Свердловской области")
+# Загрузка файла
+st.header('Загрузите данные по потреблению за 2 прошедших года и данные модели')
+data_actual = st.file_uploader("Загрузите файл (data_actual)", type=["csv"])
+data_actual_test = st.file_uploader("Загрузите файл (data_actual_test)", type=["csv"])
+cumulative_forecast = st.file_uploader("Загрузите файл (cumulative_forecast)", type=["csv"])
+cumulative_forecast_2 = st.file_uploader("Загрузите файл (cumulative_forecast_2)", type=["csv"])
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+# Если файл загружен
+if data_actual is not None and data_actual_test is not None and cumulative_forecast is not None and cumulative_forecast_2 is not None:
+    # Прочитать данные в датафрейм
+    df = pd.read_csv(data_actual)
+    df_test = pd.read_csv(data_actual_test)
+    df_forecast = pd.read_csv(cumulative_forecast)
+    df_forecast_2 = pd.read_csv(cumulative_forecast_2)
+    # Создаем график с несколькими линиями разного цвета
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df['sequence_date'], y=df['consumption'], mode='lines', name='Линия 1', line=dict(color='blue')))
+    fig.add_trace(go.Scatter(x=df_test['sequence_date'], y=df_test['consumption'], mode='lines', name='Линия 2', line=dict(color='red')))
+    fig.add_trace(go.Scatter(x=df_forecast['sequence_date'], y=df_forecast['consumption'], mode='lines', name='Линия 3', line=dict(color='green')))
+    fig.add_trace(go.Scatter(x=df_forecast_2['sequence_date'], y=df_forecast_2['consumption'], mode='lines', name='Линия 4', line=dict(color='yellow')))
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+    # Настройте макет графика
+    fig.update_layout(
+        title='График потребления электроэнергии в Свердловской области и прогноз на 24 часа',
+        xaxis_title='Дата',
+        yaxis_title='Потребление электроэнергии, МВт',
+    )
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+# Отображаем график в Streamlit
+    st.plotly_chart(fig)
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
+# Создаем данные для графика (пример)
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+
